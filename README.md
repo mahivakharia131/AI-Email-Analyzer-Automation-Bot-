@@ -3,7 +3,7 @@
 ## Overview
 This project automates email analysis and task extraction workflows using n8n automation.
 
-The workflow processes incoming email content, extracts important information such as summaries, deadlines, and tasks, and updates structured spreadsheets automatically.
+The workflow processes incoming email content, extracts important information such as summaries, deadlines, tasks, and categories, and updates structured spreadsheets automatically.
 
 ## Features
 - AI-based email analysis
@@ -24,3 +24,6 @@ The workflow processes incoming email content, extracts important information su
 3. Extract tasks and deadlines
 4. Send Telegram updates
 5. Update spreadsheet automatically
+
+## Files
+- `Email_analyzer_workflow.json` → exported n8n workflow
