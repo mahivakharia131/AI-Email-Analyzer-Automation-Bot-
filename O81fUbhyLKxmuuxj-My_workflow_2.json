@@ -1,0 +1,261 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "492066e0-ba67-4289-bded-2a8ef474fe68",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb688333-56e8-43c1-a5d1-668daad3985a",
+              "name": "email_text",
+              "value": "Subject: You won a lottery!!!   Click here to claim your prize now!!!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8980adee-4703-4e56-92aa-d84eb00a7c86",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI email analyzer.\n\nAnalyze the following email and return output in JSON format:\n\n{\n  \"category\": \"Important / Spam / Action Required\",\n  \"summary\": \"short summary\",\n  \"tasks\": [\"list of tasks\"],\n  \"deadlines\": [\"list of deadlines if any\"]\n}\n\nIf no tasks or deadlines are present, return empty arrays.\nBe accurate and do not hallucinate information.\nEmail:\n{{ $json.email_text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6a110259-1159-4e4d-bf46-ea1bcab97032",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "VIx9RfOByWXKAzx5",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Try to safely access text from different possible paths\nlet text = '';\n\nif ($json.output) {\n  text = $json.output[0]?.content?.[0]?.text || '';\n} else if ($json.data) {\n  text = $json.data[0]?.content?.[0]?.text || '';\n} else {\n  text = JSON.stringify($json);\n}\n\n// If still empty → stop with clear error\nif (!text) {\n  throw new Error(\"No text found from AI node\");\n}\n\n// Clean markdown\nconst cleanText = text.replace(/```json|```/g, '').trim();\n\n// Parse JSON\nconst parsed = JSON.parse(cleanText);\n\n// Return structured data\nreturn [{\n  json: {\n    Category: parsed.category,\n    Summary: parsed.summary,\n    Tasks: parsed.tasks.join(\", \"),\n    Deadlines: parsed.deadlines.join(\", \")\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "987ef668-5327-4ab7-971c-518d00437cff",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1W4fp6W2n3OU2PvbfQ7414ZSgMtvYHh-yThH02uOJ_pw",
+          "mode": "list",
+          "cachedResultName": "AI Email Analyzer Data ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W4fp6W2n3OU2PvbfQ7414ZSgMtvYHh-yThH02uOJ_pw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W4fp6W2n3OU2PvbfQ7414ZSgMtvYHh-yThH02uOJ_pw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Category"
+          ],
+          "schema": [
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tasks",
+              "displayName": "Tasks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Deadlines",
+              "displayName": "Deadlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "handlingExtraData": "={{ $json.category }}{{ $json.summary }}{{ $json.tasks }}{{ $json.deadlines }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        0
+      ],
+      "id": "631fde5b-fa17-4c55-bd49-5b4add3f98c3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dY3rxDEWWBVfkrRt",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1726743232",
+        "text": "=New Email Processed:\n\nCategory: {{$json.Category}}\nSummary: {{$json.Summary}}\nTasks: {{$json.Tasks}}\nDeadlines: {{$json.Deadlines}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "942ee996-ce12-497a-ae44-de572c8e4f55",
+      "name": "Send a text message",
+      "webhookId": "4a61b159-0c97-4fc7-b9a8-6d2ab6076415",
+      "credentials": {
+        "telegramApi": {
+          "id": "IiV4v5RE7Quk5JvV",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
